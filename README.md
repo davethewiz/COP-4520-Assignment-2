@@ -61,7 +61,7 @@ Once a guest enters the showroom and it is there first time entering it adds to 
 ### Compiling and Running
 To compile the code, navigate to the location of this repo in your terminal and run the following:
 ```
-g++ crystal_vase.cpp -o crysal_vase
+g++ crystal_vase.cpp -o crystal_vase
 ```
 Then, run the code by running the executable:
 ```
@@ -73,7 +73,7 @@ The code will output when a guest has seen the vase for the first time and when 
 The randomness involved in this one is even deeper compared to the labyrinth question. Now the guests are not just randomely interested in entering the showroom, but if the showroom is occupied, they walk around the party for some random amount of time. As a result, the times can be much longer than the previous one.
 
 Here are a range of runtimes for a given number of guests (note these are in seconds because they take much longer!):
-10 guests: 1-3s
-25 guests: 6-9s
-50 guests: 16-20s
-100 guests: 31-40s
+- 10 guests: 1-3s
+- 25 guests: 6-9s
+- 50 guests: 16-20s
+- 100 guests: 31-40s
