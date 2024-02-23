@@ -7,7 +7,7 @@ using namespace std;
 
 const int GUEST_COUNT = 100;
 
-bool allCompleted = false;
+bool allEntered = false;
 int currentGuestID = -1;
 bool isPlateEmpty = false;
 
@@ -17,7 +17,7 @@ void solveLabyrinth(int id) {
     bool cupcakeEaten = false;
     int solveCount = 0; // only for the first guest to worry about
 
-    while (!allCompleted) {
+    while (!allEntered) {
         entrance.lock();
 
         if (currentGuestID == id) {
@@ -31,7 +31,7 @@ void solveLabyrinth(int id) {
 
                 // Tell the mintaur that everyone has finished the labyrinth (ending the party)
                 if (solveCount == GUEST_COUNT - 1)
-                    allCompleted = true;
+                    allEntered = true;
             }
             else if (!isPlateEmpty && !cupcakeEaten) {
                 cupcakeEaten = true;
@@ -54,7 +54,7 @@ int main() {
     }
 
     // if all have yet to complete the labyrinth, the minotaur will keep randomly picking guests
-    while (!allCompleted) {
+    while (!allEntered) {
         currentGuestID = rand() % GUEST_COUNT;
     }
 
