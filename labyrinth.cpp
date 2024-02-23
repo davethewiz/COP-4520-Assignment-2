@@ -1,55 +1,71 @@
+using namespace std;
+
 #include <iostream>
-
 #include <random>
-
 #include <thread>
 #include <mutex>
 
-#include <random>
-#include <chrono>
+const int GUEST_COUNT = 100;
 
-const int GUEST_COUNT = 8;
-
-bool partyEnded = false;
+bool allCompleted = false;
 int currentGuestID = -1;
 bool isPlateEmpty = false;
 
+mutex entrance; // a mutex representing the entrance to the labyrinth
 
-// Runs for all other guests besides the first one
 void solveLabyrinth(int id) {
     bool cupcakeEaten = false;
+    int solveCount = 0; // only for the first guest to worry about
 
-    while (!partyEnded) {
-        // mutex locking here
-        if (currentGuestID == id && !isPlateEmpty && !cupcakeEaten) {
+    while (!allCompleted) {
+        entrance.lock();
 
+        if (currentGuestID == id) {
+            // Designates first guests as a checker
+            if (id == 0) {
+                if (isPlateEmpty) {
+                    solveCount++;
+                    cout << solveCount+1 << " out of " << GUEST_COUNT << " have completed the labyrinth!" << endl;
+                    isPlateEmpty = false; // ask for a new cupcake
+                }
+
+                // Tell the mintaur that everyone has finished the labyrinth (ending the party)
+                if (solveCount == GUEST_COUNT - 1)
+                    allCompleted = true;
+            }
+            else if (!isPlateEmpty && !cupcakeEaten) {
+                cupcakeEaten = true;
+                isPlateEmpty = true;
+            }
         }
 
-        // unlock mutex 
-    }
-}
-
-// Only runs for the first guest as they are designated as the "checker"
-void checkCupcake() {
-    int solveCount = 0;
-
-    while (!partyEnded) {
-        // do some mutex locking here
-        if (currentGuestID == 0 && isPlateEmpty) {
-            solveCount++;
-        }
-
-        if (solveCount == GUEST_COUNT) {
-            partyEnded = true; // Think of this as the first guest "telling" the minotaur that the party has ended (all guests have finished the labyrinth)
-        }
-
-        // unlock mutex
+        entrance.unlock();
     }
 }
 
 int main() {
-    // start all threads at once with the "solveLabyrinth" function (except for first one)
-    // Let first thread run the "checkCupcake" function instead (can't we just use main thread? Main thread IS the first checker?)
-    // randomly select a guest ID every frame or on some timer
-    // if party has ended, print out final time!
+    auto start_time = chrono::high_resolution_clock::now();
+
+    vector<thread> guests;
+
+    // represent the guests as threads running "solveLabyrinth"
+    for (int i = 0; i < GUEST_COUNT; i++) {
+        guests.push_back(thread(solveLabyrinth, i));
+    }
+
+    // if all have yet to complete the labyrinth, the minotaur will keep randomly picking guests
+    while (!allCompleted) {
+        currentGuestID = rand() % GUEST_COUNT;
+    }
+
+    // once all have completed the labyrinth, we'll have all the guests "join" up together
+    for (thread &guest : guests)
+        guest.join();
+
+    // calculate runtime and print result
+    auto end_time = chrono::high_resolution_clock::now();
+    int runtime_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+
+    cout << endl;
+    cout << "All " << GUEST_COUNT << " guests have completed the labyrinth in " << runtime_ms << " milliseconds!" << endl;
 }
